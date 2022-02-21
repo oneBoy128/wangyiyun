@@ -1960,6 +1960,7 @@
                 },
             }).then(response=>response.json())
             .then(reslut=>{
+                console.log(reslut);
                 for(let i = 0;i<reslut.result.songs.length;i++){
                     let music = document.createElement('div');
                     let musicer = document.createElement('div');
@@ -1987,18 +1988,25 @@
                 music.append(musicer);
                 music.append(zj);
                 music.append(music_time);
+                musicId.push({
+                        id:reslut.result.songs[i].id,
+                        ar:reslut.result.songs[i].artists,
+                        name:reslut.result.songs[i].name,
+                        zj:reslut.result.songs[i].album.name,
+                        time:reslut.result.songs[i].duration,
+                        pic:reslut.result.songs[i].album.artist.img1v1Url,
+                    });
                 musicIId.push(reslut.result.songs[i].id);
                 music.ondblclick =(event)=>{
                     bf_list.push(reslut.result.songs[i]);
-                    musicId.push(reslut.result.songs[i]);
                     souMusic.push(reslut.result.songs[i]);
                     bf_pic.style.backgroundImage=`url()`;
                     bf_ar.innerText=musicer.innerHTML;
-                    bf_musName.innerHTML=`${souMusic[i].name}<span class="iconfont">&#xe617;</span>`;
+                    bf_musName.innerHTML=`${reslut.result.songs[i].name}<span class="iconfont">&#xe617;</span>`;
                     index_music = musicSrc.findIndex(item=>item.id==event.currentTarget.id);
                     change_bf(index_music);
+                    lisenMusic(index_music);
                 }
-                music.addEventListener('dblclick',lisenMusic);
                 gdss_list.append(music);
                 }
                 Src();
@@ -2143,12 +2151,10 @@
         return time;
     }
 
-    function lisenMusic(even){/*播放音乐*/
+    function lisenMusic(index){/*播放音乐*/
         toyinyve.className = 'bf_close';
         pause.className = '';
-        let music_now = even.currentTarget;
-        let music_next = music_now.nextElementSibling;
-        let indx = musicSrc.find(item=>item.id==even.currentTarget.id);
+        let indx = musicSrc.find(item=>item.id==musicId[index].id);
         audio.src = indx.url;
         audio.play();
     }
@@ -2166,7 +2172,7 @@
             musicId[index].ar.forEach(element => {
                     ar.push(element.name);
             });
-            bf_pic.style.backgroundImage=`url(${musicId[index].al.picUrl})`;
+            bf_pic.style.backgroundImage=`url(${musicId[index].pic})`;
             console.log(musicId);
         }
         bf_ar.innerText=ar.join('/');
@@ -2189,7 +2195,7 @@
             musicId[index].ar.forEach(element => {
                     ar.push(element.name);
             });
-            die_tx.src = `${musicId[index].al.picUrl}`;
+            die_tx.src = `${musicId[index].pic}`;
             console.log(musicId);
         }
         bf_name.innerHTML = `<h1>${musicId[index].name}</h1><span>${ar.join('/')}</span>`;
@@ -2406,7 +2412,6 @@
         if(audio.src=='http://127.0.0.1:5500/test.html'){
             return;
         }
-        console.log(musicId);
         index_music = (index_music-1)%musicSrc.length;
         change_music(index_music);
         change_bf(index_music);
@@ -2487,9 +2492,10 @@
                                     <div class="bfList_time">
                                         ${bf_list[i].time}
                                     </div>`;
-            bfList_music.ondblclick = lisenMusic;
+            
             bfList_music.addEventListener('dblclick',()=>{
-                index_music = i;
+                index_music = musicSrc.findIndex(item=>item.id==event.currentTarget.id);
+                lisenMusic(index_music);
                 change_music(index_music);
                 change_bf(index_music);
             })         
@@ -2511,6 +2517,9 @@
             })
             .then(response=>response.json())
             .then(reslut=>{
+                console.log(musicIId);
+                console.log(musicId);
+                console.log(musicSrc);
                 for(let i = 0;i<musicIId.length;i++){
                     let mus = reslut.data.find(item=>item.id===musicIId[i]);
                     musicSrc.push(mus);
@@ -2563,7 +2572,14 @@
                 musicer.classList.add('musicer');
                 music.classList.add('music');
                 music.id = rel.playlist.tracks[i].id;
-                musicId.push(rel.playlist.tracks[i]);
+                musicId.push({
+                    id:rel.playlist.tracks[i].id,
+                    ar:rel.playlist.tracks[i].ar,
+                    name:rel.playlist.tracks[i].name,
+                    zj:rel.playlist.tracks[i].al.name,
+                    time:rel.playlist.tracks[i].dt,
+                    pic:rel.playlist.tracks[i].al.picUrl,
+                });
                 musicIId.push(rel.playlist.tracks[i].id);
                 music.innerHTML = `<span class="number">${music_index+i}</span>
                                 <div class="caozuo">
@@ -2589,13 +2605,13 @@
                 music.append(zj);
                 music.append(music_time);
                 music.ondblclick = (event)=>{
-                    bf_pic.style.backgroundImage=`url(${rel.playlist.tracks[i].al.picUrl})`;
-                    bf_ar.innerText=musicer.innerHTML;
-                    bf_musName.innerHTML=`${rel.playlist.tracks[i].name}<span class="iconfont">&#xe617;</span>`;
                     index_music = musicId.findIndex(item=>item.id==event.currentTarget.id);
+                    bf_pic.style.backgroundImage=`url(${musicId[index_music].pic})`;
+                    bf_ar.innerText=musicer.innerHTML;
+                    bf_musName.innerHTML=`${musicId[index_music].name}<span class="iconfont">&#xe617;</span>`;
                     change_bf(index_music);
+                    lisenMusic(index_music);
                 }
-                music.addEventListener('dblclick',lisenMusic);
                 music_list.append(music);
             }
             Src();
